@@ -42,30 +42,35 @@ def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0301"):
 
     return num_tokens
 
-print("Enter/Paste your content. Press Enter then Ctrl-D or Ctrl-Z ( windows ) to save it.")
-contents = []
-while True:
-    try:
-        line = input()
-    except EOFError:
-        break
-    contents.append(line)
+def get_cost_from_api_model_data_price(api: str = "chat", model: str="gpt-3.5-turbo", data = "", tokenprice: float = 0.0):
 
-in_code = "".join(contents)
+    api = api.lower()
 
-api = input("\nAre you using Chat API (1) or Text-Completion API (2)? \n[Enter 1 or 2]: ")
-model = input("\nOpenAI Model (Example: gpt-4): \nModel: ")
+    valid_api = {"chat","text"}
 
-# Chat API vs Text-Completion API
-if api == 1:
-    num_tokens = num_tokens_from_messages(in_code, model)
-else:
-    num_tokens = num_tokens_from_string(in_code, model)
+    if api not in valid_api:
+        raise ValueError("results: api must be one of %r." % valid_api)
+
+    if api == "chat"and type(data) != list:
+        raise ValueError("results: message must be one of type [list] when using the Chat Completion API.")
+
+    if api == "text"and type(data) != str:
+        raise ValueError("results: message must be one of type [string] when using the Text Completion API.")
 
 
-print(f"\nNum Tokens: {num_tokens}")
-price_per_token =  input("Price per token: ")
+    # Chat API vs Text-Completion API
+    if api == "chat":
+        num_tokens = num_tokens_from_messages(data, model)
 
-price_per_tokencost = int(num_tokens) * float(price_per_token)
+    if api == "text":
+        num_tokens = num_tokens_from_string(data, model)
 
-print(f"Total Cost: {price_per_tokencost}")
+
+    print(f"\nNum Tokens: {num_tokens}")
+
+
+    price_per_tokencost = int(num_tokens) * float(tokenprice)
+
+    print(f"Total Cost: {price_per_tokencost}")
+
+cost = get_cost_from_api_model_data_price("text","gpt-3.5-turbo","Hello world!",0.002)
